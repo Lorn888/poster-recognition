@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poster Recognition</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; }
+    h1 { color: #333; }
+    input[type="file"] { margin: 20px 0; }
+    img { max-width: 90%; margin: 10px 0; border: 1px solid #ccc; }
+    #result { margin-top: 20px; font-size: 1.2em; color: #007700; }
+    #loading { color: #555; }
+  </style>
+</head>
+<body>
+  <h1>🎬 Poster Recognition</h1>
+  <p>Select or take a photo of a poster:</p>
+  <input type="file" id="posterInput" accept="image/*" capture="environment">
+  <div id="loading"></div>
+  <div id="preview"></div>
+  <div id="result"></div>
+
+  <script>
+    const posterInput = document.getElementById('posterInput');
+    const preview = document.getElementById('preview');
+    const resultDiv = document.getElementById('result');
+    const loading = document.getElementById('loading');
+
+    // 👇 Replace this URL with your actual Render API URL
+    const API_URL = "https://poster-recognition.onrender.com/";
+
+    posterInput.addEventListener('change', async () => {
+      const file = posterInput.files[0];
+      if (!file) return;
+
+      preview.innerHTML = '';
+      resultDiv.innerHTML = '';
+      loading.textContent = '🔄 Processing...';
+
+      // Show preview
+      const imgEl = document.createElement('img');
+      imgEl.src = URL.createObjectURL(file);
+      preview.appendChild(imgEl);
+
+      // Send to API
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch(`${API_URL}/search`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) throw new Error('API error');
+
+        const data = await response.json();
+        loading.textContent = '';
+        resultDiv.innerHTML = `🎯 Best match: <strong>${data.best_match}</strong><br>Similarity: ${data.similarity}`;
+      } catch (err) {
+        loading.textContent = '';
+        resultDiv.textContent = '❌ Error contacting API';
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
