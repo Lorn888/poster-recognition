@@ -1,3 +1,4 @@
+from flask_cors import CORS
 from flask import Flask, request, jsonify
 import numpy as np
 from tensorflow.keras.models import load_model
@@ -9,6 +10,7 @@ import io
 from PIL import Image
 
 app = Flask(__name__)
+CORS(app, origins=["https://lorn888.github.io"])
 
 # Load model and embeddings once
 MODEL_PATH = "poster_model/poster_model.h5"
