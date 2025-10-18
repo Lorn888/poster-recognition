@@ -13,7 +13,7 @@ from PIL import Image
 # App Setup
 # -----------------------
 app = Flask(__name__)
-CORS(app, origins=["*"])  # Allow all origins or specify yours
+CORS(app, origins=["*"])  # Allow all origins; adjust for production if needed
 
 # -----------------------
 # Load Model and Embeddings
@@ -36,11 +36,10 @@ print("✅ Embeddings loaded")
 def home():
     return jsonify({"message": "Poster Recognition API is running 🚀"})
 
-
 @app.route("/search", methods=["POST"])
 def search_poster():
     try:
-        # Check file uploaded
+        # Check if a file was uploaded
         if "file" not in request.files:
             return jsonify({"error": "No file uploaded"}), 400
 
@@ -51,8 +50,8 @@ def search_poster():
         x = np.expand_dims(x, axis=0)
         x = preprocess_input(x)
 
-        # Get feature vector from model
-        query_feat = model.predict(x)[0]
+        # Get feature vector and flatten to 1D
+        query_feat = model.predict(x).flatten()
 
         # Compare with embeddings
         best_match, best_score = None, -1
@@ -69,7 +68,6 @@ def search_poster():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # -----------------------
 # Run App
